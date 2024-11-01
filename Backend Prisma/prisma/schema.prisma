@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          Int           @id @default(autoincrement())
+  name        String
+  width       Decimal
+  height      Decimal
+  length      Decimal
+  id_Stock    String        @unique
+  stock       Stock         @relation(fields: [id_Stock], references: [id])
+  productSold ProductSold[]
+  Historical  Historical?
+}
+
+model Stock {
+  id               String       @id @default(cuid())
+  outbound         Int
+  inbound          Int
+  current_quantity Int
+  product          Product?
+  productSold      ProductSold?
+  historical       Historical?
+}
+
+model ProductSold {
+  id         String   @id @default(cuid())
+  product_id Int // aca estaria referenciando al producto. el mismo siempre tiene el stock actualizado 
+  createdAt  DateTime @default(now())
+  id_stock   String   @unique // asignando  el stock de la fecha. Puede ser que se vendió o que compró.  
+  product    Product  @relation(fields: [product_id], references: [id])
+  stock      Stock    @relation(fields: [id_stock], references: [id])
+}
+
+model Historical {
+  id         String   @id @default(cuid())
+  product_id Int      @unique
+  Product    Product  @relation(fields: [product_id], references: [id])
+  date       DateTime
+  id_Stock   String   @unique
+  stock      Stock    @relation(fields: [id_Stock], references: [id])
+}
+
+//Agregar año y stock
