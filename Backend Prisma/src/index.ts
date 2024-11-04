@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { DELETEPROD, GETPROD, POSTPROD } from './routes/products/+server';
-import { GETSTOCK, POSTSTOCK } from './routes/stock/+server';
+import { deleteProduct, getById_Products, getProducts, postProducts, putProducts } from './routes/products/+server';
+import { getStock, postStock } from './routes/stock/+server';
 //const crypto = require('node:crypto')
 const app = express();
 app.disable('x-powered-by')
@@ -16,15 +16,24 @@ app.use(express.json())
 
 app.get('/products', async (_request, response) => {
     try {
-        const products = await GETPROD()
+        const products = await getProducts()
         response.status(200).json(products)
     } catch (error) {
         console.error(error)
     }
 });
+
+app.get('/products/:id', async (request, response) => {
+    try {
+        const products = await getById_Products(request)
+        response.status(200).json(products)
+    } catch (error) {
+        console.error(error)
+    }
+})
 app.get('/stock', async (_request, response) => {
     try {
-        const newStock = await GETSTOCK()
+        const newStock = await getStock()
         response.status(newStock.status).json(newStock.stock)
     } catch (error) {
         console.error(error)
@@ -42,7 +51,7 @@ app.get('/stock', async (_request, response) => {
 //     }
 // })
 app.post('/products', (request: Request, response: Response) => {
-    POSTPROD(request)
+    postProducts(request)
         .then(result => response.status(result.status).json(result.product || result.error))
         .catch(error => {
             console.error('Error al crear el producto:', error);
@@ -50,7 +59,7 @@ app.post('/products', (request: Request, response: Response) => {
         });
 });
 app.post('/stock', (request: Request, response: Response) => {
-    POSTSTOCK(request)
+    postStock(request)
         .then(result => response.status(result.status).json(result.newStock))
         .catch(error => {
             console.error('Error al crear el producto:', error);
@@ -58,7 +67,7 @@ app.post('/stock', (request: Request, response: Response) => {
         });
 });
 app.delete('/products/:id', (request: Request, response: Response) => {
-    DELETEPROD(request).then(result => response.status(200).json(result)).catch(error => {
+    deleteProduct(request).then(result => response.status(200).json(result)).catch(error => {
         console.error('Error al crear el producto:', error);
         response.status(500).json({ error: 'Failed to create product' });
     });
@@ -66,45 +75,17 @@ app.delete('/products/:id', (request: Request, response: Response) => {
 })
 
 // // Endpoint para agregar un nuevo dato
-// app.post('/products', (req: Request, res: Response) => {
-//     const result = validateProduct(req.body)
-
-//     if (!result.success) {
-//        // return res.status(422).json({ error: result.error.issues })
-//         return result.json({status: 422})
-//     }
-//     const newProduct = await prisma.product.create({       
-//        data: {
-//         // ...result.data,
-//         name: result.name,
-//         price: result.price,
-//        }
-//     })
-//     console.log(newProduct)
-//     return result.json({status: 210})
-// });
 
 
-// app.put('/products/:id', (req, res) => {
-//     const { id } = req.params;
-//     const result = validateProduct(req.body)
 
-//     if (!result.success) {
-//         return res.status(422).json({ error: result.error.issues })
-//     }
-//     const productIndex = dataProducts.findIndex(p => p.id === id)
-
-//     if (productIndex === -1) {
-//         return res.status(404).send('Item not found');
-//     }
-//     const updatedProduct = {
-//         ...dataProducts[productIndex],
-//         ...result.data,
-//     }
-//     dataProducts[productIndex] = updatedProduct;
-
-//     res.status(200).json(updatedProduct);
-// });
+app.put('/products/:id', async (request: Request, response: Response) => {
+    try {
+        const modifyProduct = await putProducts(request)
+        response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct.message);
+    } catch (error) {
+        console.log(error)
+    }
+});
 
 // // Endpoint para eliminar un dato
 // app.delete('/products/:id', (req, res) => {
