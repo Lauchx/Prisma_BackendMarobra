@@ -2,18 +2,16 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { deleteProduct, getById_Products, getProducts, postProducts, putProducts } from './routes/products/+server';
 import { getStock, postStock } from './routes/stock/+server';
-//const crypto = require('node:crypto')
-const app = express();
+import { getProductsSold, postProductSold } from './routes/products_sold/+server';
+const app = express()
 app.disable('x-powered-by')
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT ?? 3000
 
 app.use(cors())
 app.use(express.json())
 
-//const { validateProduct } = require('./schemas/products_schema');
-
-// Endpoint para obtener los datos
-
+// Endpoint for get products, stock or  productsSold
+// GET Method
 app.get('/products', async (_request, response) => {
     try {
         const products = await getProducts()
@@ -22,16 +20,19 @@ app.get('/products', async (_request, response) => {
         console.error(error)
     }
 });
-
-app.get('/products/:id', async (request, response) => {
-    try {
-        const products = await getById_Products(request)
-        response.status(200).json(products)
+app.get('/productsSold', async (_request, response) => {
+    try { 
+        const productSold = await getProductsSold() 
+        response.status(200).json(productSold)
     } catch (error) {
         console.error(error)
+        response.status(500).json({message: 'Internal Server Error'})
+
     }
 })
-app.get('/stock', async (_request, response) => {
+
+app.get('/stock', async (_request, response) => { //  GET stock Method (Me parece que no se usa)
+
     try {
         const newStock = await getStock()
         response.status(newStock.status).json(newStock.stock)
@@ -40,16 +41,28 @@ app.get('/stock', async (_request, response) => {
     }
 });
 
-// Endpoint para crear un nuevo producto
-// app.post('/products', async (request: Request, response: Response) => {
-//     try {
-//         const result = await POST(request)
-//          response.status(201).json(result);
-//     } catch (error) {
-//         console.log(error)
-//         return response.status(500).json({ error: 'Failed to create product' });
-//     }
-// })
+//  Endpoint for get products by id or productsSold by month
+
+app.get('/products/:id', async (request, response) => {
+    try {
+        const products = await getById_Products(request)
+        response.status(products.status).json(products)
+    } catch (error) {
+        console.error(error)
+    }
+})
+app.get('/sold/:month', async (request, response) => {
+    try {
+        //const products_month = await getProducts_byMonth(request)
+        //response.status(products_month.status).json(products_month)
+    } catch (error) {
+        console.error(error)
+    }
+})
+
+
+//Endpoint for create new product, stock or productSold
+// POST Method
 app.post('/products', (request: Request, response: Response) => {
     postProducts(request)
         .then(result => response.status(result.status).json(result.product || result.error))
@@ -58,6 +71,7 @@ app.post('/products', (request: Request, response: Response) => {
             response.status(500).json({ error: 'Failed to create product' });
         });
 });
+
 app.post('/stock', (request: Request, response: Response) => {
     postStock(request)
         .then(result => response.status(result.status).json(result.newStock))
@@ -66,6 +80,16 @@ app.post('/stock', (request: Request, response: Response) => {
             response.status(500).json({ error: 'Failed to create product' });
         });
 });
+app.post('/productsSold', (request: Request, response: Response) => {
+    postProductSold(request)
+        .then(result => response.status(result.status).json(result.productSold || result.error))
+        .catch(error => {
+            console.error('Error al crear el producto:', error);
+            response.status(500).json({ error: 'Failed to create product' });
+        });
+})
+// Endpoind for delete products
+// DELETE Method
 app.delete('/products/:id', (request: Request, response: Response) => {
     deleteProduct(request).then(result => response.status(200).json(result)).catch(error => {
         console.error('Error al crear el producto:', error);
@@ -73,11 +97,8 @@ app.delete('/products/:id', (request: Request, response: Response) => {
     });
 
 })
-
-// // Endpoint para agregar un nuevo dato
-
-
-
+// Endpoind  for update products
+// PUT Method 
 app.put('/products/:id', async (request: Request, response: Response) => {
     try {
         const modifyProduct = await putProducts(request)
