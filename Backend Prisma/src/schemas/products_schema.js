@@ -3,7 +3,7 @@ const zod = require('zod')
 const stockSchema = zod.object({
     outbound: zod.number().min(0).default(0),
     inbound: zod.number().min(0).default(0),
-    current_quantity: zod.number().min(0, 'Current_quantity is required')
+    current_quantity: zod.number().int().min(0, 'Current_quantity is required')
 });
 const productSold_Schema = zod.object({
   product_id: zod.number().positive(),

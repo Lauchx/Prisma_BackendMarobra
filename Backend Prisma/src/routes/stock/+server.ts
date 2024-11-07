@@ -16,7 +16,6 @@ export async function getStock() {
 export async function postStock(request: Request) {
     try {
         const req_stock = await request.body.stock
-        console.log(req_stock)
         let { outbound, inbound, current_quantity } = req_stock
 
         // outbound = outbound ? outbound : 0
@@ -52,5 +51,4 @@ export async function putStock(request: Request, id: string) {
         return { error: 'Failed to update product', status: 500 };
 
     }
-
 }

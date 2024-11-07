@@ -1,11 +1,11 @@
 import { prisma } from "../../database/client";
 import { Request } from 'express';
 import { postStock } from "../stock/+server";
-const {validateProductSold} = require('../../schemas/products_schema');
+const { validateProductSold } = require('../../schemas/products_schema');
 
 export async function getProductsSold() {
     try {
-        const productSold = await prisma.productSold.findMany({include: { stock: true, product:true }})
+        const productSold = await prisma.productSold.findMany({ include: { stock: true, product: true } })
         return { productSold, status: 200 }
     } catch (error) {
         return { error, status: 500 }
@@ -31,7 +31,7 @@ export async function postProductSold(request: Request) {
         const result = validateProductSold(request.body)
         if (!result.success) return { error: result, status: 422 }
 
-        const { product_id, createdAt } = await request.body
+        const { product_id, createdAt } = await request.body  // cambiar a result.body
         const stockResponse = await postStock(request)
         if (stockResponse.error || !stockResponse.newStock) {
             // if exist error when create  stock return error
@@ -45,4 +45,22 @@ export async function postProductSold(request: Request) {
 
     }
 }
+// export async function putProductSold(request: Request) {
+//     let { id } = request.params;
+//     const result = validateProductSold(request.body)
+//     if (!result.success) {
+//         return { error: result, status: 422 }
+//     }
+//     const modifyProduct = await prisma.productSold.update({
+//         where: { id: id },
+//         data: { outbound: result.outbound,  }
+//     })
+//     Llama al metodo para actualizar el stock.
+//     putStock(request, modifyProduct.id_Stock)
+//     if (!modifyProduct) {
+//         return { error: 'Product not found', status: 404 }
+//     }
+
+//     return { message: 'Product modify', status: 200 }
+// }
 

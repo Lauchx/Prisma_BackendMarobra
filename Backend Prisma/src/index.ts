@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { deleteProduct, getById_Products, getProducts, postProducts, putProducts } from './routes/products/+server';
-import { getStock, postStock } from './routes/stock/+server';
+import { getStock, postStock, putStock } from './routes/stock/+server';
 import { getProductsSold, postProductSold } from './routes/products_sold/+server';
 const app = express()
 app.disable('x-powered-by')
@@ -107,6 +107,17 @@ app.put('/products/:id', async (request: Request, response: Response) => {
         console.log(error)
     }
 });
+app.put('/productsSold/:id', async (request: Request, response: Response) => {
+    try {
+     const modifyProduct = await putStock(request, request.body.stock.id)// --> SOLO hay que actualizar el STOCK
+     console.log(modifyProduct.status)  
+     response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct);
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+
 
 // // Endpoint para eliminar un dato
 // app.delete('/products/:id', (req, res) => {
