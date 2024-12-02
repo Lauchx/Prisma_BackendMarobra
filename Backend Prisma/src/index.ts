@@ -73,10 +73,10 @@ app.get('/productsSold_byId/:id', async (request, response) => {
 
     }
 })
-app.get('/sold/:month', async (request, response) => {
+app.get('/productSold/:month', async (request, response) => {
     try {
-        //const products_month = await getProducts_byMonth(request)
-        //response.status(products_month.status).json(products_month)
+        const historical = await getHistorical(request)
+        response.status(historical.status).json(historical)
     } catch (error) {
         console.error(error)
     }

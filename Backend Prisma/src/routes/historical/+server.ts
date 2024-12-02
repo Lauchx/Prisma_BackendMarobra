@@ -2,10 +2,30 @@ import { prisma } from "../../database/client";
 import { Request } from 'express';
 import { postStock } from "../stock/+server";
 
+
+// export async function getHistorical(request: Request) {
+//     try {
+//         const historical = await prisma.historical.findMany()
+//         if(historical.length <= 0) return { historical: "No hay productos", status: 403 };
+//         return { historical: historical, status: 200 };
+//     } catch (error) {
+//         console.log(error)
+//         return { error: error, status: 500 }
+//     }
+
+// }
 export async function getHistorical(request: Request) {
     try {
-        const historical = await prisma.historical.findMany()
-        if(historical.length <= 0) return { historical: "No hay productos", status: 403 };
+        const { month } = await request.params
+
+        const year = new Date().getFullYear();
+        const startDate = new Date(year, parseInt(month) - 1, 1); 
+        const endDate = new Date(year, parseInt(month), 0);
+        console.log("start:", startDate, "end:", endDate )
+        console.log(await prisma.historical.findMany())
+        const historical = await prisma.productSold.findMany({where: { createdAt: {gte: startDate, lte:endDate} }})
+        console.log(historical, "historical")
+        if (historical.length <= 0) return { historical:`No hay productos en el mes ${month}`, status: 400 };
         return { historical: historical, status: 200 };
     } catch (error) {
         console.log(error)
@@ -14,7 +34,8 @@ export async function getHistorical(request: Request) {
 
 }
 
-export async function postHistorical(request:Request) {
+
+export async function postHistorical(request: Request) {
     try {
         //const result = validateProduct(request.body)
         // if (!result.success) {
