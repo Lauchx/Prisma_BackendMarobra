@@ -41,10 +41,16 @@ export async function postStock(request: Request) {
 }
 export async function putStock(request: Request, id: string) {
     try {
+        console.log("//////////////////////////////////////////")
+        console.log(request.body)
+        console.log("//////////////////////////////////////////")
         const modStock = await prisma.stock.update({
             where: { id },
             data: { inbound: request.body.stock.inbound, outbound: request.body.stock.outbound, current_quantity: request.body.stock.current_quantity }
         });
+        console.log("fffffffffffffffffffffffffffffff")
+        console.log(modStock)
+        console.log("lllllllllllllllllllllllll")
         return { modStock, status: 200 }
     } catch (error) {
         console.log(error)

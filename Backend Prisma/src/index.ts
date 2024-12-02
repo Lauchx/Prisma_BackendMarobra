@@ -2,7 +2,9 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { deleteProduct, getById_Products, getProducts, postProducts, putProducts } from './routes/products/+server';
 import { getStock, postStock, putStock } from './routes/stock/+server';
-import { getProductsSold, postProductSold } from './routes/products_sold/+server';
+import { deleteProductSold, getById_ProductSold, getProductSold_byIdProduct, getProductsSold, postProductSold } from './routes/products_sold/+server';
+
+import { getHistorical, postHistorical } from './routes/historical/+server';
 const app = express()
 app.disable('x-powered-by')
 const PORT = process.env.PORT ?? 3000
@@ -21,12 +23,12 @@ app.get('/products', async (_request, response) => {
     }
 });
 app.get('/productsSold', async (_request, response) => {
-    try { 
-        const productSold = await getProductsSold() 
+    try {
+        const productSold = await getProductsSold()
         response.status(200).json(productSold)
     } catch (error) {
         console.error(error)
-        response.status(500).json({message: 'Internal Server Error'})
+        response.status(500).json({ message: 'Internal Server Error' })
 
     }
 })
@@ -51,6 +53,26 @@ app.get('/products/:id', async (request, response) => {
         console.error(error)
     }
 })
+app.get('/productsSold/:id', async (request, response) => {
+    try {
+        const productSold = await getById_ProductSold(request)
+        response.status(200).json(productSold)
+    } catch (error) {
+        console.error(error)
+        response.status(500).json({ message: 'Internal Server Error' })
+
+    }
+})
+app.get('/productsSold_byId/:id', async (request, response) => {
+    try {
+        const productSold = await getProductSold_byIdProduct(request)
+        response.status(200).json(productSold)
+    } catch (error) {
+        console.error(error)
+        response.status(500).json({ message: 'Internal Server Error' })
+
+    }
+})
 app.get('/sold/:month', async (request, response) => {
     try {
         //const products_month = await getProducts_byMonth(request)
@@ -58,6 +80,10 @@ app.get('/sold/:month', async (request, response) => {
     } catch (error) {
         console.error(error)
     }
+})
+app.get('/historical', async (request, response) => {
+    const historical = await getHistorical(request)
+    response.status(historical.status).json(historical)
 })
 
 
@@ -88,6 +114,10 @@ app.post('/productsSold', (request: Request, response: Response) => {
             response.status(500).json({ error: 'Failed to create product' });
         });
 })
+app.post('/historical',async(request: Request, response: Response) => {
+   const historical = await postHistorical(request)
+   response.status(historical.status).json(historical)
+} )
 // Endpoind for delete products
 // DELETE Method
 app.delete('/products/:id', (request: Request, response: Response) => {
@@ -97,25 +127,36 @@ app.delete('/products/:id', (request: Request, response: Response) => {
     });
 
 })
+app.delete('/productsSold/:id', (request: Request, response: Response) => {
+    console.log("s")
+    deleteProductSold(request).then(result => {
+        response.status(result.status).json(result)
+    }).catch(error => {
+        console.error('Error al crear el producto:', error);
+        return response.status(error.status).json({ error: 'Failed to create product' });
+    })
+})
 // Endpoind  for update products
 // PUT Method 
 app.put('/products/:id', async (request: Request, response: Response) => {
     try {
         const modifyProduct = await putProducts(request)
-        response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct.message);
+        console.log("---------------------------finished------------------------")
+        response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct.modifyProduct);
     } catch (error) {
         console.log(error)
     }
 });
 app.put('/productsSold/:id', async (request: Request, response: Response) => {
     try {
-     const modifyProduct = await putStock(request, request.body.stock.id)// --> SOLO hay que actualizar el STOCK
-     console.log(modifyProduct.status)  
-     response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct);
+        const modifyProduct = await putStock(request, request.body.stock.id)// --> SOLO hay que actualizar el STOCK
+        response.status(modifyProduct.status).json(modifyProduct.error || modifyProduct);
     } catch (error) {
         console.log(error)
+        response.status(500).json({ error: 'Failed to update product' });
     }
 });
+
 
 
 

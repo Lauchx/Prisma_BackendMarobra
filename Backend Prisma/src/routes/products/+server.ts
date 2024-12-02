@@ -57,20 +57,22 @@ export async function postProducts(request: Request) {
 }
 export async function deleteProduct(request: Request) {
     try {
-        const id = Number(request.params.id)
-        const deleted = await prisma.product.delete({ where: { id: id } })
+        //const id = Number(request.params.id)
+        const {id} =  request.params
+        const deleted = await prisma.product.delete({ where: { id: Number(id) } })
 
         console.log(deleted)
         return { body: "Products wad  deleted", status: 200 }
 
     } catch (error) {
         console.error('Error deleting product:', error);
-        return { error: 'Failed to delete product', status: 500 };
+        return { error: error, status: 500 };
     }
 }
 export async function putProducts(request: Request) {
     let { id } = request.params;
     const result = validateProduct_InPut(request.body)
+    console.log(result, "putProducts")
     if (!result.success) {
         return { error: result, status: 422 }
     }
@@ -81,6 +83,8 @@ export async function putProducts(request: Request) {
     if (!modifyProduct) {
         return { error: 'Product not found', status: 404 }
     }
+    console.log("---")
+    console.log(modifyProduct)
 
-    return { message:'Product modify', status: 200 }
+    return { modifyProduct, status: 200 }
 }

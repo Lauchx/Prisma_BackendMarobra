@@ -11,6 +11,16 @@ export async function getProductsSold() {
         return { error, status: 500 }
     }
 }
+export async function getById_ProductSold(request: Request) {
+    try {
+        const { id } = request.params
+        const productSold = await prisma.productSold.findUnique({ where: { id }, include: { stock: true, product: true } })
+        if (!productSold) return { error: "Not found", status: 200 }
+        return { productSold, status: 200 }
+    } catch (error) {
+        return { error: error, status: 500 }
+    }
+}
 export async function getProductsSold_ById(request: Request) {
     try {
         // Obtener los productos de la base de datos
@@ -45,22 +55,30 @@ export async function postProductSold(request: Request) {
 
     }
 }
-// export async function putProductSold(request: Request) {
-//     let { id } = request.params;
-//     const result = validateProductSold(request.body)
-//     if (!result.success) {
-//         return { error: result, status: 422 }
-//     }
-//     const modifyProduct = await prisma.productSold.update({
-//         where: { id: id },
-//         data: { outbound: result.outbound,  }
-//     })
-//     Llama al metodo para actualizar el stock.
-//     putStock(request, modifyProduct.id_Stock)
-//     if (!modifyProduct) {
-//         return { error: 'Product not found', status: 404 }
-//     }
-
-//     return { message: 'Product modify', status: 200 }
-// }
+export async function deleteProductSold(request: Request) {
+    try {
+        const { id } = request.params
+        console.log(id)
+        const productDelete = await prisma.productSold.delete({ where: { id: id } })
+        if (productDelete == null) return { body: "ProductSold not found", status: 444 }
+        return { body: "Delete productSold", status: 200 }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        return { error: error, status: 500 };
+    }
+}
+export async function getProductSold_byIdProduct(request: Request) {
+    try {
+        const { id } = request.params
+        if (id != null) {
+            const productSold = await prisma.productSold.findUnique({ where: { product_id: Number(id) }, include: { stock: true } })
+            if (productSold == null) return { body: "ProductSold not found", status: 444 }
+            return { productSold, status: 200 }
+        }
+        return { status: 404 }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        return { error: error, status: 500 };
+    }
+}
 
