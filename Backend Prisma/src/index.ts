@@ -66,7 +66,7 @@ app.get('/productsSold/:id', async (request, response) => {
 app.get('/productsSold_byId/:id', async (request, response) => {
     try {
         const productSold = await getProductSold_byIdProduct(request)
-        response.status(200).json(productSold)
+        response.status(productSold.status).json(productSold)
     } catch (error) {
         console.error(error)
         response.status(500).json({ message: 'Internal Server Error' })

@@ -21,7 +21,7 @@ model Product {
   length      Decimal
   id_Stock    String       @unique
   stock       Stock        @relation(fields: [id_Stock], references: [id])
-  productSold ProductSold?
+  productSold ProductSold[]
   Historical  Historical?
 }
 
@@ -37,11 +37,12 @@ model Stock {
 
 model ProductSold {
   id         String   @id @default(cuid())
-  product_id Int      @unique // aca estaria referenciando al producto. el mismo siempre tiene el stock actualizado 
+  product_id Int     
   createdAt  DateTime @default(now())
   id_stock   String   @unique // asignando  el stock de la fecha. Puede ser que se vendió o que compró.  
   product    Product  @relation(fields: [product_id], references: [id])
   stock      Stock    @relation(fields: [id_stock], references: [id])
+   
 }
 
 model Historical {

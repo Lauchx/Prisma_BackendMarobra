@@ -15,7 +15,7 @@ export async function getById_ProductSold(request: Request) {
     try {
         const { id } = request.params
         const productSold = await prisma.productSold.findUnique({ where: { id }, include: { stock: true, product: true } })
-        if (!productSold) return { error: "Not found", status: 200 }
+        if (!productSold) return { error: "Not found", status: 400 }
         return { productSold, status: 200 }
     } catch (error) {
         return { error: error, status: 500 }
@@ -71,7 +71,7 @@ export async function getProductSold_byIdProduct(request: Request) {
     try {
         const { id } = request.params
         if (id != null) {
-            const productSold = await prisma.productSold.findUnique({ where: { product_id: Number(id) }, include: { stock: true } })
+            const productSold = await prisma.productSold.findMany({ where: { product_id: Number(id) }, include: { stock: true } })
             if (productSold == null) return { body: "ProductSold not found", status: 444 }
             return { productSold, status: 200 }
         }

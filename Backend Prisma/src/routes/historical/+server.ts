@@ -23,7 +23,7 @@ export async function getHistorical(request: Request) {
         const endDate = new Date(year, parseInt(month), 0);
         console.log("start:", startDate, "end:", endDate )
         console.log(await prisma.historical.findMany())
-        const historical = await prisma.productSold.findMany({where: { createdAt: {gte: startDate, lte:endDate} }})
+        const historical = await prisma.productSold.findMany({where: { createdAt: {gte: startDate, lte:endDate}}, include: { product: true, stock:true}})
         console.log(historical, "historical")
         if (historical.length <= 0) return { historical:`No hay productos en el mes ${month}`, status: 400 };
         return { historical: historical, status: 200 };
